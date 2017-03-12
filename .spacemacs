@@ -29,32 +29,38 @@ values."
    ;; Paths must have a trailing slash (i.e. `~/.mycontribs/')
    dotspacemacs-configuration-layer-path '()
    ;; List of configuration layers to load.
-   dotspacemacs-configuration-layers
-   '(
+   dotspacemacs-configuration-layers '(
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
      ;; <M-m f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
      helm
-     ;; auto-completion
+     auto-completion
      ;; better-defaults
      emacs-lisp
      ;; git
-     ;; markdown
      ;; org
-     ;; (shell :variables
-     ;;        shell-default-height 30
-     ;;        shell-default-position 'bottom)
+     (shell :variables
+             shell-default-height 30
+             shell-default-position 'bottom)
      ;; spell-checking
      ;; syntax-checking
      ;; version-control
-     )
+     (gtags :variables
+            gtags-enable-by-default t)
+     (c-c++ :variables 
+             c-c++-enable-clang-support t)
+     python
+    )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '()
+   dotspacemacs-additional-packages '(
+    simpleclip
+    key-chord
+   )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -133,7 +139,7 @@ values."
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
    dotspacemacs-default-font '("Source Code Pro"
-                               :size 13
+                               :size 20
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
@@ -299,7 +305,64 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-  )
+
+  (require 'simpleclip)
+  (simpleclip-mode 1)
+  (define-key evil-insert-state-map (kbd "C-c") 'simpleclip-copy)
+  (define-key evil-insert-state-map (kbd "C-x") 'simpleclip-cut)
+  (define-key evil-insert-state-map (kbd "C-v") 'simpleclip-paste)
+
+  ;; copy/paste from terminal mode - look simpleclip patch
+  (unless window-system
+    (setq x-select-enable-clipboard t))
+
+  (define-key evil-insert-state-map (kbd "C-z") 'undo)
+  (define-key evil-insert-state-map (kbd "C-y") 'redo)
+
+  (require'key-chord)
+  (key-chord-mode 1)
+  (setq key-chord-two-keys-delay 1.5)
+  (key-chord-define evil-normal-state-map "gd" 'helm-gtags-find-tag)
+  (key-chord-define evil-normal-state-map "gr" 'helm-gtags-find-rtag)
+  (key-chord-define evil-normal-state-map "ga" 'helm-gtags-find-pattern)
+  (key-chord-define evil-normal-state-map "gs" 'helm-gtags-find-symbol)
+  (key-chord-define evil-normal-state-map "gb" 'helm-gtags-previous-history)
+  (key-chord-define evil-normal-state-map "gn" 'helm-gtags-next-history)
+  (key-chord-define evil-normal-state-map "gf" 'helm-gtags-find-files)
+  (key-chord-define evil-normal-state-map "gu" 'helm-gtags-create-tags)
+
+  (key-chord-define evil-normal-state-map "wq" 'kill-buffer-and-window)
+
+  (global-set-key [f2] 'save-buffer)
+
+  (define-key evil-insert-state-map (kbd "C-<tab>") 'company-complete)
+
+  (setq c-default-style "linux"
+        c-basic-offset 4)
+
+  (setq-default helm-make-build-dir "/home/alex/TMP/test")
+
+)
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (vmd-mode mmm-mode markdown-toc markdown-mode gh-md yapfify xterm-color simpleclip shell-pop pyvenv pytest pyenv-mode py-isort pip-requirements multi-term live-py-mode key-chord hy-mode helm-pydoc helm-gtags ggtags eshell-z eshell-prompt-extras esh-help cython-mode company-anaconda anaconda-mode pythonic helm-company helm-c-yasnippet company-statistics company-c-headers company auto-yasnippet yasnippet ac-ispell auto-complete disaster cmake-mode clang-format ws-butler window-numbering which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spacemacs-theme spaceline restart-emacs request rainbow-delimiters quelpa popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide ido-vertical-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump define-word column-enforce-mode clean-aindent-mode auto-highlight-symbol auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+(defun testfunc ()
+  (interactive)
+  (if window-system
+      (message "GUI")
+      (message "TERMINAL")))
