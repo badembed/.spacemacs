@@ -35,11 +35,14 @@ values."
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
      ;; <M-m f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
-     helm
      auto-completion
      ;; better-defaults
      emacs-lisp
-     ;; git
+     git
+     helm
+     lsp
+     ;; markdown
+     multiple-cursors
      ;; org
      (shell :variables
              shell-default-height 30
@@ -47,11 +50,26 @@ values."
      ;; spell-checking
      ;; syntax-checking
      ;; version-control
-     (gtags :variables
-            gtags-enable-by-default t)
-     (c-c++ :variables 
-             c-c++-enable-clang-support t)
-     python
+     ;; treemacs
+
+     rust
+     (c-c++ :variables
+            c-c++-backend 'lsp-clangd)
+
+     (version-control :variables
+                      version-control-diff-tool 'git-gutter+
+                      version-control-diff-side 'left
+                      version-control-global-margin t)
+
+     ;; -----------------------------------------------------------------
+     (osx :variables osx-command-as       'hyper
+                   osx-option-as        'meta
+                   osx-control-as       'control
+                   osx-function-as      nil
+                   osx-right-command-as 'left
+                   osx-right-option-as  'left
+                   osx-right-control-as 'left
+                   osx-swap-option-and-command nil)
     )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -60,6 +78,7 @@ values."
    dotspacemacs-additional-packages '(
     simpleclip
     key-chord
+    simpleclip
    )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -306,11 +325,18 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
+  (require 'helm-file-preview)
+  (helm-file-preview-mode 1)
+
   (require 'simpleclip)
   (simpleclip-mode 1)
   (define-key evil-insert-state-map (kbd "C-c") 'simpleclip-copy)
   (define-key evil-insert-state-map (kbd "C-x") 'simpleclip-cut)
   (define-key evil-insert-state-map (kbd "C-v") 'simpleclip-paste)
+  ;;(define-key evil-insert-state-map (kbd "H-c") 'simpleclip-copy)
+  ;;(define-key evil-insert-state-map (kbd "H-x") 'simpleclip-cut)
+  ;;(define-key evil-insert-state-map (kbd "H-v") 'simpleclip-paste)
+
 
   ;; copy/paste from terminal mode - look simpleclip patch
   (unless window-system
@@ -342,6 +368,27 @@ you should place your code here."
 
   (setq-default helm-make-build-dir "/home/alex/TMP/test")
 
+  (key-chord-define evil-normal-state-map "fd" 'lsp-find-definition)
+  (key-chord-define evil-normal-state-map "fr" 'lsp-find-references)
+  (key-chord-define evil-normal-state-map "fb" 'xref-pop-marker-stack)
+
+  (global-set-key (kbd "<H-right>") 'end-of-line)
+  (define-key evil-insert-state-map (kbd "<H-right>") 'end-of-line)
+  (define-key evil-insert-state-map (kbd "<S-right>") 'evil-forward-chars 1)
+  (global-set-key (kbd "<H-left>") 'beginning-of-line-text)
+  (define-key evil-insert-state-map (kbd "<H-left>") 'beginning-of-line-text)
+  (define-key evil-insert-state-map (kbd "<S-left>") 'evil-backward-chars 1)
+  (setq shift-select-mode t)
+
+  (define-key evil-insert-state-map (kbd "<H-up>") 'backward-page)
+  (global-set-key (kbd "<H-up>") 'backward-page)
+  (define-key evil-insert-state-map (kbd "<H-down>") 'forward-page)
+  (global-set-key (kbd "<H-down>") 'forward-page)
+
+  (define-key evil-insert-state-map (kbd "<M-up>") 'scroll-down)
+  (global-set-key (kbd "<M-up>") 'scroll-down)
+  (define-key evil-insert-state-map (kbd "<M-down>") 'scroll-up)
+  (global-set-key (kbd "<M-down>") 'scroll-up)
 )
 
 ;; Do not write anything past this comment. This is where Emacs will
